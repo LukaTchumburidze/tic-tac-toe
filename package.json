@@ -1,0 +1,31 @@
+{
+  "name": "tic-tac-toe",
+  "version": "1.0.0",
+  "description": "Simple Tic-Tac-Toe application",
+  "main": "brain.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukaTchumburidze/tic-tac-toe.git"
+  },
+  "keywords": [
+    "tic-tac-toe"
+  ],
+  "author": "Luka Tchumburidze",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LukaTchumburidze/tic-tac-toe/issues"
+  },
+  "homepage": "https://github.com/LukaTchumburidze/tic-tac-toe#readme",
+  "dependencies": {
+    "@types/angular": "^1.6.48",
+    "@types/jquery": "^3.3.4",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "eslint": "^5.1.0",
+    "express": "^4.16.3",
+    "express-handlebars": "^3.0.0"
+  }
+}

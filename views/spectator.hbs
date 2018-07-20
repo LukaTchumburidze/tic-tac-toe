@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Go ahead, play</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <style>
+        svg {
+            width: 40%;
+        }
+
+        body {
+            text-align: center;
+        }
+
+        .top {
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        var moves = [];
+        moves[0] = -1;
+        var colArray = ["#d80000", "#890000", "#d3b900", "#877d00"];
+
+        $(document).ready(function () {
+            console.log($(".top").length);
+
+            spectatorAJAX();
+        });
+
+        function processElements(arr) {
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i] == "10") {
+                    return;
+                }
+
+                var nativeInd = arr[i] * 2 + 1;
+                console.log("arr " + arr[i] + " " + nativeInd);
+                if ((moves.length + i) % 2 == 1) {
+                    activateElem.call($(".top").get(arr[i] - 1), colArray[0], colArray[1]);
+                } else {
+                    activateElem.call($(".top").get(arr[i] - 1), colArray[2], colArray[3]);
+                }
+            }
+
+            if (arr.length%2 == 1) {
+                setStatus ("First player's move");
+            } else {
+                setStatus ("Second player's move");
+            }
+        }
+
+        function setStatus (val) {
+            $("#status").html (val);
+        }
+
+        function spectatorAJAX() {
+            var lastInd = moves[moves.length - 1];
+            if (lastInd == 10) {
+                let victor = "be praised";
+                if (moves.length%2 == 1) {
+                    victor = "player 1";
+                } else {
+                    victor = "player 2";
+                }
+                setStatus("Game has been ended, " + victor + " has won, click Play button");
+                return;
+            }
+            console.log(lastInd);
+            $.ajax({
+                type: "POST",
+                url: "brain-spectate",
+                contentType: 'application/json',
+                data: JSON.stringify({ lastInd: lastInd }),
+                success: function (data) {
+                    console.log(data);
+                    processElements(data);
+                    moves.push(...data);
+                    spectatorAJAX.call(this);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.statusText == 'timeout') {
+                        spectatorAJAX.call(this);
+                    }
+                },
+                timeout: 500
+            });
+        }
+
+        function activateElem(color1, color2) {
+            console.log(this);
+
+            $(this).unbind();
+            $(this).css({ fill: color1, transition: "1.0s" });
+            $(this).prev().css({ fill: color2, transition: "1.0s" });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Hi there!</h1>
+    <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 770 765.5">
+        <defs>
+            <style>
+                .top {
+                    stroke: #fff;
+                    stroke-miterlimit: 10;
+                }
+
+                .top {
+                    fill: #d6d6d6;
+                }
+
+                .bot {
+                    fill: #878787;
+                }
+            </style>
+        </defs>
+        <title>tictac</title>
+        <circle class="cls-1 bot" cx="112" cy="121" r="111.5" />
+        <circle class="cls-2 top" data-cy="112" cx="112" cy="112" r="111.5" />
+        <circle class="cls-3 bot" cx="391" cy="121" r="111.5" />
+        <circle class="cls-4 top" data-cy="112" cx="391" cy="112" r="111.5" />
+        <circle class="cls-5 bot" cx="658" cy="121" r="111.5" />
+        <circle class="cls-6 top" data-cy="112" cx="658" cy="112" r="111.5" />
+        <circle class="cls-1 bot" cx="112" cy="389" r="111.5" />
+        <circle class="cls-2 top" data-cy="380" cx="112" cy="380" r="111.5" />
+        <circle class="cls-1 bot" cx="391" cy="389" r="111.5" />
+        <circle class="cls-2 top" data-cy="380" cx="391" cy="380" r="111.5" />
+        <circle class="cls-1 bot" cx="658" cy="389" r="111.5" />
+        <circle class="cls-2 top" data-cy="380" cx="658" cy="380" r="111.5" />
+        <circle class="cls-1 bot" cx="112" cy="654" r="111.5" />
+        <circle class="cls-2 top" data-cy="645" cx="112" cy="645" r="111.5" />
+        <circle class="cls-1 bot" cx="391" cy="654" r="111.5" />
+        <circle class="cls-2 top" data-cy="645" cx="391" cy="645" r="111.5" />
+        <circle class="cls-1 bot" cx="658" cy="654" r="111.5" />
+        <circle class="cls-2 top" data-cy="645" cx="658" cy="645" r="111.5" />
+
+        <animate xlink:href=".top" attributeName="cx" from="50" to="450" dur="1s" begin="click" fill="freeze" />
+    </svg>
+    <h3 id="status"></h3>
+</body>
+
+</html>
