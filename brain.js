@@ -39,6 +39,7 @@ function init(len) {
 	if (moves !== undefined && moves[moves.length-1] != 10) {
 		return false;
 	}
+	//
 
 	firstCookie = undefined;
 	secondCookie = undefined;
