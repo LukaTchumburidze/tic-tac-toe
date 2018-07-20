@@ -24,19 +24,16 @@
         var colArray = ["#d80000", "#890000", "#d3b900", "#877d00"];
 
         $(document).ready(function () {
-            console.log($(".top").length);
-
             spectatorAJAX();
         });
 
         function processElements(arr) {
             for (var i = 0; i < arr.length; i++) {
-                if (arr[i] == "10") {
+                if (arr[i] == 10) {
                     return;
                 }
 
                 var nativeInd = arr[i] * 2 + 1;
-                console.log("arr " + arr[i] + " " + nativeInd);
                 if ((moves.length + i) % 2 == 1) {
                     activateElem.call($(".top").get(arr[i] - 1), colArray[0], colArray[1]);
                 } else {
@@ -44,37 +41,30 @@
                 }
             }
 
-            if (arr.length%2 == 1) {
-                setStatus ("First player's move");
+            if (arr.length % 2 == 1) {
+                setStatus("First player's move");
             } else {
-                setStatus ("Second player's move");
+                setStatus("Second player's move");
             }
         }
 
-        function setStatus (val) {
-            $("#status").html (val);
+        function setStatus(val) {
+            $("#status").html(val);
         }
 
         function spectatorAJAX() {
             var lastInd = moves[moves.length - 1];
             if (lastInd == 10) {
-                let victor = "be praised";
-                if (moves.length%2 == 1) {
-                    victor = "player 1";
-                } else {
-                    victor = "player 2";
-                }
-                setStatus("Game has been ended, " + victor + " has won, click Play button");
+                gameEnded();
                 return;
             }
-            console.log(lastInd);
+
             $.ajax({
                 type: "POST",
                 url: "brain-spectate",
                 contentType: 'application/json',
                 data: JSON.stringify({ lastInd: lastInd }),
                 success: function (data) {
-                    console.log(data);
                     processElements(data);
                     moves.push(...data);
                     spectatorAJAX.call(this);
@@ -88,9 +78,31 @@
             });
         }
 
-        function activateElem(color1, color2) {
-            console.log(this);
+        function gameEnded() {
+            let victorMessage = "be praised";
+            if (moves.length % 2 == 1) {
+                victorMessage = "player 1 has won";
+            } else {
+                victorMessage = "player 2 has won";
+            }
 
+            if (moves.length == 11) {
+                setStatus("It's a tie, click Play button!");
+            } else {
+                setStatus("Game has been ended, " + victorMessage + ", click Play button");
+            }
+            $("#restart").show();
+        }
+
+        function resetAJAX() {
+            $.ajax({
+                type: "DELETE",
+                url: "brain-reset",
+                contentType: 'application/json'
+            });
+        }
+
+        function activateElem(color1, color2) {
             $(this).unbind();
             $(this).css({ fill: color1, transition: "1.0s" });
             $(this).prev().css({ fill: color2, transition: "1.0s" });
@@ -140,6 +152,7 @@
         <animate xlink:href=".top" attributeName="cx" from="50" to="450" dur="1s" begin="click" fill="freeze" />
     </svg>
     <h3 id="status"></h3>
+    <button id="restart" onclick="resetAJAX(); location.href=location.href" hidden>Start the game!</button>
 </body>
 
 </html>

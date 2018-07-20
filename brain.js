@@ -64,17 +64,6 @@ function init(len) {
 	return true;
 }
 
-app.delete('/brain-clear', function (req, res) {
-	if (init(3)) {
-		res.status(200);
-		res.statusMessage = "Restarting the game!";
-	} else {
-		res.status(403);
-		res.statusMessage = "Game have been ended!";
-	}
-	res.end();
-});
-
 function getRandomString(len) {
 	let val = "";
 	for (let i = 0; i < len; i++) {
@@ -102,7 +91,7 @@ app.get('/', function (req, res) {
 
 	switch (cookie) {
 		case firstCookie:
-			res.render('index', { isInitiator: true });
+			res.render('index', { isInitiator: true,  });
 			break;
 		case secondCookie:
 			res.render('index', { isInitiator: false });
@@ -111,6 +100,19 @@ app.get('/', function (req, res) {
 			res.render('spectator');
 	}
 });
+
+app.delete('/brain-reset', function (req, res) {
+	if (init(3)) {
+		console.log ("Reseting Game!");
+		res.status(200);
+		res.statusMessage = "Restarting the game!";
+	} else {
+		res.status(403);
+		res.statusMessage = "Game hasn't been ended!";
+	}
+	res.end();
+});
+
 
 app.post('/brain-move', function (req, res) {
 	var curInd = req.body.index;
@@ -143,10 +145,8 @@ app.post('/brain-move', function (req, res) {
 		return;
 	}
 
-	console.log(moves.length);
 	moves[moves.length] = curInd;
 	used[curInd] = curID;
-	console.log(moves.length);
 
 	curInd--;
 	var quo = parseInt(curInd / 3);
@@ -179,7 +179,12 @@ app.post('/brain-move', function (req, res) {
 
 	res.end();
 });
+
 function getResult() {
+	if (moves.length == 10) {
+		return 0;
+	}
+
 	for (var i = 0; i < 3; i++) {
 		if (col[i][firstCookie] == 3 || row[i][firstCookie] == 3) {
 			return firstCookie;
@@ -205,8 +210,6 @@ app.post('/brain-spectate', function (req, res) {
 	var lastInd = req.body.lastInd;
 	var resArr;
 
-	console.log(lastInd);
-	console.log(moves);
 	for (i = 0; i < moves.length; i++) {
 		if (lastInd == moves[i]) {
 			resArr = moves.slice(i + 1);

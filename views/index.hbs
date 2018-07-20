@@ -37,8 +37,6 @@
         }
 
         $(document).ready(function () {
-            console.log($(".top").length);
-
             makeItAlive($(".top"));
             spectatorAJAX();
 
@@ -62,9 +60,6 @@
                 url: "brain-move",
                 contentType: 'application/json',
                 data: JSON.stringify({ index: (ind - 1) / 2 }),
-                success: function (data, textStatus, jqXHR) {
-                    console.log(data);
-                },
                 error: function (jqXHR, textStatus, errorThrown) {
                     alert("There was an error");
                     makeItAlive(this);
@@ -74,13 +69,11 @@
 
         function processElements(arr) {
             for (var i = 0; i < arr.length; i++) {
-                arr[i] = parseInt(arr[i]);
                 if (arr[i] == 10) {
                     return;
                 }
 
                 var nativeInd = arr[i] * 2 + 1;
-                console.log("arr " + arr[i] + " " + nativeInd);
                 if ((moves.length + i) % 2 == 1) {
                     activateElem.call($(".top").get(arr[i] - 1), colArray[0], colArray[1]);
                 } else {
@@ -111,15 +104,10 @@
         function spectatorAJAX() {
             var lastInd = moves[moves.length - 1];
             if (lastInd == 10) {
-                let victor;
-                if (moves.length%2 == 1) {
-                    victor = "player 1";
-                } else {
-                    victor = "player 2";
-                }
-                setStatus("Game has been ended, " + victor + " has won, click play button!");
+                gameEnded();
                 return;
             }
+
             $.ajax({
                 type: "POST",
                 url: "brain-spectate",
@@ -129,20 +117,50 @@
                     processElements(data);
                     moves.push(...data);
                     spectatorAJAX.call(this);
-                    console.log(moves);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     if (jqXHR.statusText == 'timeout') {
                         spectatorAJAX.call(this);
                     }
                 },
-                timeout: 2000
+                timeout: 500
+            });
+        }
+
+        function gameEnded() {
+            let victorMessage;
+            if (moves.length % 2 == 1) {
+                if (isInitiator) {
+                    victorMessage = "you won"
+                } else {
+                    victorMessage = "opponent won"
+                }
+            } else {
+                if (!isInitiator) {
+                    victorMessage = "you won"
+                } else {
+                    victorMessage = "opponent won"
+                }
+            }
+
+            if (moves.length == 11) {
+                setStatus("It's a tie, click Play button!");
+            } else {
+                setStatus("Game has been ended, " + victorMessage + ", click Play button");
+            }
+            $("#restart").show();
+            return;
+        }
+
+        function resetAJAX() {
+            $.ajax({
+                type: "DELETE",
+                url: "brain-reset",
+                contentType: 'application/json'
             });
         }
 
         function activateElem(color1, color2) {
-            console.log(this);
-
             $(this).unbind();
             $(this).css({ fill: color1, transition: "1.0s" });
             $(this).prev().css({ fill: color2, transition: "1.0s" });
@@ -223,7 +241,7 @@
         <animate xlink:href=".top" attributeName="cx" from="50" to="450" dur="1s" begin="click" fill="freeze" />
     </svg>
     <h3 id="status"></h3>
-    <button id = "restart" hidden>Start the game!</button>
+    <button id="restart" onclick="resetAJAX(); location.href=location.href" hidden>Start the game!</button>
 </body>
 
 </html>
