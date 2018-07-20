@@ -40,6 +40,7 @@ function init(len) {
 		return false;
 	}
 	//
+	//
 
 	firstCookie = undefined;
 	secondCookie = undefined;
